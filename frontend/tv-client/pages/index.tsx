@@ -156,8 +156,8 @@ export default function TVClientPage() {
           }
           
           // Воспроизводим звук окончания на последней секунде
-          if (newValue === 1 && !timerSoundsPlayedRef.current.finish) {
-            console.log('🎵 Timer at 1 second - playing finish sound');
+          if (newValue === 0 && !timerSoundsPlayedRef.current.finish) {
+            console.log('🎵 Timer at 0 second - playing finish sound');
             timerSoundsPlayedRef.current.finish = true;
             // Вызываем playSound вне функции обновления состояния
             setTimeout(() => {

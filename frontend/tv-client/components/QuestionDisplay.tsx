@@ -73,12 +73,19 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
     return null;
   };
 
+  // Определяем цвет таймера в зависимости от оставшегося времени
+  const getTimerColor = (seconds: number): string => {
+    if (seconds <= 10) return 'text-red-400'; // Красный
+    if (seconds <= 30) return 'text-yellow-400'; // Желтый
+    return 'text-green-400'; // Зеленый
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-full px-8 text-center fade-in">
       {/* Таймер */}
       {showTimer && timerSeconds !== undefined && (
         <div className="mb-8">
-          <div className="text-tv-2xl font-bold text-red-500 animate-pulse">
+          <div className={`text-tv-2xl font-bold ${getTimerColor(timerSeconds)} animate-pulse`}>
             {Math.floor(timerSeconds / 60)}:{(timerSeconds % 60).toString().padStart(2, '0')}
           </div>
         </div>
