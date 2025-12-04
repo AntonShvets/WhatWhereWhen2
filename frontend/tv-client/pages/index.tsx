@@ -463,7 +463,7 @@ export default function TVClientPage() {
         <div className={`px-4 py-2 rounded-lg text-sm font-bold ${
           connected ? 'bg-green-600' : 'bg-red-600'
         }`}>
-          {connected ? '✓ Подключено' : '✗ Отключено'}
+          {connected ? '✓' : '✗'}
         </div>
       </div>
 
@@ -486,29 +486,6 @@ export default function TVClientPage() {
         {renderMainContent()}
       </div>
       
-      {/* Debug info (только для разработки) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed bottom-4 left-4 bg-black bg-opacity-75 text-white text-xs p-2 rounded max-w-xs z-50">
-          <div>content: {displayStatus?.content || 'undefined'}</div>
-          <div>show_question: {String(displayStatus?.show_question)}</div>
-          <div>question_text: {displayStatus?.question_text?.substring(0, 30) || 'none'}</div>
-          <button
-            onClick={() => {
-              console.log('TEST: Manually setting displayStatus');
-              setDisplayStatus({
-                content: 'question',
-                show_question: true,
-                question_text: 'ТЕСТОВЫЙ ВОПРОС',
-                question_type: 'text',
-              });
-            }}
-            className="mt-2 px-2 py-1 bg-blue-500 text-white rounded text-xs"
-          >
-            Тест: Установить вопрос
-          </button>
-        </div>
-      )}
-
       {/* Подсказка для разблокировки аудио */}
       {!audioUnlocked && (
         <div 

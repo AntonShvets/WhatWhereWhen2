@@ -106,7 +106,7 @@ export const TVClientExample: React.FC<{ gameId: string }> = ({ gameId }) => {
           <div className={`inline-block px-4 py-2 rounded-lg ${
             connected ? 'bg-green-600' : 'bg-red-600'
           }`}>
-            {connected ? '✓ Подключено' : '✗ Отключено'}
+            {connected ? '✓' : '✗'}
           </div>
         </div>
 
@@ -234,7 +234,7 @@ export const TVClientWithMultipleAudio: React.FC<{ gameId: string }> = ({ gameId
       <div className={`px-4 py-2 rounded-lg ${
         connected ? 'bg-green-600' : 'bg-red-600'
       }`}>
-        {connected ? '✓ Подключено' : '✗ Отключено'}
+        {connected ? '✓' : '✗'}
       </div>
 
       {currentSound && (
