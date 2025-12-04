@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { getSocket, disconnectSocket } from '../lib/socket';
 import { gamesApi, questionsApi, viewersApi, Game, Question, Viewer } from '../lib/api';
 import { ScoreDisplay } from '../components/ScoreDisplay';
+import { Scoreboard } from '../components/Scoreboard';
 import { QuestionDisplay } from '../components/QuestionDisplay';
 import { ViewerDisplay } from '../components/ViewerDisplay';
 import { AnswerDisplay } from '../components/AnswerDisplay';
@@ -358,6 +359,26 @@ export default function TVClientPage() {
     console.log('status.show_question:', status.show_question);
     console.log('status.question_text:', status.question_text);
 
+    // Показать логотип
+    if (status.content === 'logo') {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+      const logoUrl = status.media 
+        ? (status.media.startsWith('http') 
+            ? status.media 
+            : `${API_URL}${status.media}`)
+        : `${API_URL}/uploads/game_logo.jpg`;
+      
+      return (
+        <div className="flex items-center justify-center h-full w-full">
+          <img 
+            src={logoUrl} 
+            alt="Game Logo" 
+            className="max-w-full max-h-full object-contain"
+          />
+        </div>
+      );
+    }
+
     // Показать вопрос (приоритет - проверяем первым)
     // Проверяем оба условия: content === 'question' ИЛИ show_question === true
     const hasContent = status && Object.keys(status).length > 0;
@@ -408,12 +429,10 @@ export default function TVClientPage() {
     // Показать счет
     if (status.content === 'score' || status.show_score === true) {
       return (
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <div className="text-tv-3xl font-bold text-blue-400 mb-8">ЗНАТОКИ: {expertsScore}</div>
-            <div className="text-tv-3xl font-bold text-purple-400">ТЕЛЕЗРИТЕЛИ: {viewersScore}</div>
-          </div>
-        </div>
+        <Scoreboard 
+          expertsScore={expertsScore}
+          viewersScore={viewersScore}
+        />
       );
     }
 
@@ -448,17 +467,21 @@ export default function TVClientPage() {
         </div>
       </div>
 
-      {/* Счет (постоянно видимый вверху) */}
-      <ScoreDisplay
-        expertsScore={expertsScore}
-        viewersScore={viewersScore}
-        show={showScore}
-      />
+      {/* Счет (постоянно видимый вверху) - скрывается при показе полного табло */}
+      {!(displayStatus?.content === 'score' || displayStatus?.show_score === true) && (
+        <ScoreDisplay
+          expertsScore={expertsScore}
+          viewersScore={viewersScore}
+          show={showScore}
+        />
+      )}
 
       {/* Основная область контента */}
       <div 
         className="w-full h-full flex items-center justify-center"
-        style={{ paddingTop: showScore ? '120px' : '0' }}
+        style={{ 
+          paddingTop: showScore && !(displayStatus?.content === 'score' || displayStatus?.show_score === true) ? '120px' : '0' 
+        }}
       >
         {renderMainContent()}
       </div>

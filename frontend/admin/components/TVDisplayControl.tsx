@@ -173,6 +173,23 @@ export const TVDisplayControl: React.FC<TVDisplayControlProps> = ({ currentRound
     updateDisplayStatus(displayStatus);
   };
 
+  /**
+   * Кнопка "Показать Лого"
+   */
+  const handleShowLogo = () => {
+    const displayStatus = {
+      content: 'logo',
+      show_question: false,
+      show_answer: false,
+      show_viewer: false,
+      show_score: false,
+      show_timer: false,
+      media: '/uploads/game_logo.jpg',
+    };
+
+    updateDisplayStatus(displayStatus);
+  };
+
   return (
     <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg shadow-xl p-6 mb-6 border-4 border-purple-300">
       <h2 className="text-3xl font-bold mb-4 text-gray-800 flex items-center">
@@ -217,11 +234,19 @@ export const TVDisplayControl: React.FC<TVDisplayControlProps> = ({ currentRound
         </button>
 
         <button
+          onClick={handleShowLogo}
+          disabled={!currentRound || loading}
+          className="px-6 py-4 bg-pink-600 hover:bg-pink-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-bold text-lg transition-all transform hover:scale-105 shadow-lg"
+        >
+          🎨 Показать Лого
+        </button>
+
+        <button
           onClick={handleHideContent}
           disabled={!currentRound || loading}
           className="px-6 py-4 bg-gray-800 hover:bg-gray-900 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-bold text-lg transition-all transform hover:scale-105 shadow-lg col-span-2 md:col-span-1"
         >
-          ⬛ Скрыть Контент / Черный Экран
+          ⬛ Черный Экран
         </button>
       </div>
 
