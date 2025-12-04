@@ -72,7 +72,6 @@ export const RoundControl: React.FC<RoundControlProps> = ({ gameId, currentRound
             show_question: true,
             show_timer: true,
             timer_seconds: 60,
-            timer_start_time: Date.now(), // Добавляем timestamp для принудительного перезапуска
             ...questionData,
           },
         }, (response: any) => {

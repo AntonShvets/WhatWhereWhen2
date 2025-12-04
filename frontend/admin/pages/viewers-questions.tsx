@@ -74,6 +74,21 @@ export default function ViewersQuestionsPage() {
     }
   };
 
+  // Добавьте новую функцию для загрузки фото телезрителя
+  const handleViewerPhotoUpload = async (file: File) => {
+    try {
+      setUploading(true);
+      const response = await uploadApi.uploadMedia(file);
+      const url = response.data.url;
+      setViewerFormData({ ...viewerFormData, photo_url: url });
+    } catch (error) {
+      console.error('Error uploading viewer photo:', error);
+      alert('Ошибка загрузки фото');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleViewerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -255,13 +270,38 @@ export default function ViewersQuestionsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">URL Фото</label>
-                  <input
-                    type="url"
-                    value={viewerFormData.photo_url}
-                    onChange={(e) => setViewerFormData({ ...viewerFormData, photo_url: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Фото Телезрителя</label>
+                  <div className="flex items-center space-x-4">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleViewerPhotoUpload(file);
+                      }}
+                      disabled={uploading}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+                    />
+                    {viewerFormData.photo_url && (
+                      <div className="flex items-center space-x-2">
+                        <img
+                          src={viewerFormData.photo_url.startsWith('http') 
+                            ? viewerFormData.photo_url 
+                            : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'}${viewerFormData.photo_url}`}
+                          alt="Preview"
+                          className="h-16 w-16 object-cover rounded"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setViewerFormData({ ...viewerFormData, photo_url: '' })}
+                          className="text-red-600 hover:text-red-800 text-sm"
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  {uploading && <p className="text-sm text-gray-500 mt-1">Загрузка...</p>}
                 </div>
               </div>
               <button

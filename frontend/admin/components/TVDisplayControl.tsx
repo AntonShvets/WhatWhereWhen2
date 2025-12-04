@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getSocket } from '../lib/socket';
-import { roundsApi, questionsApi, Round, Question } from '../lib/api';
+import { roundsApi, questionsApi, viewersApi, Round, Question } from '../lib/api';
 
 interface TVDisplayControlProps {
   currentRound: Round | null;
@@ -104,19 +104,29 @@ export const TVDisplayControl: React.FC<TVDisplayControlProps> = ({ currentRound
       return;
     }
 
-    // Здесь нужно загрузить информацию о телезрителе
-    // Для примера используем данные из вопроса
-    const displayStatus = {
-      content: 'viewer',
-      show_viewer: true,
-      viewer_name: 'Телезритель', // Загрузить из API
-      viewer_city: 'Город', // Загрузить из API
-      viewer_photo: null, // Загрузить из API
-      show_question: false,
-      show_score: false,
-    };
+    try {
+      setLoading(true);
+      // Загружаем данные телезрителя из API
+      const viewerResponse = await viewersApi.getById(currentQuestion.viewer_id);
+      const viewer = viewerResponse.data;
 
-    updateDisplayStatus(displayStatus);
+      const displayStatus = {
+        content: 'viewer',
+        show_viewer: true,
+        viewer_name: viewer.name || 'Телезритель',
+        viewer_city: viewer.city || null,
+        viewer_photo: viewer.photo_url || null,
+        show_question: false,
+        show_score: false,
+      };
+
+      updateDisplayStatus(displayStatus);
+    } catch (error) {
+      console.error('Error loading viewer:', error);
+      alert('Ошибка загрузки данных телезрителя');
+    } finally {
+      setLoading(false);
+    }
   };
 
   /**
