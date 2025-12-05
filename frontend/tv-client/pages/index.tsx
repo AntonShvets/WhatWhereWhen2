@@ -397,6 +397,10 @@ export default function TVClientPage() {
       console.log('Question text:', status.question_text);
       const questionText = status.question_text || currentQuestion?.text || '';
       console.log('Final question text:', questionText);
+      
+      // Проверяем, началось ли обсуждение (когда статус 'question_shown')
+      const isDiscussionStarted = status.content === 'question' && status.show_timer && !questionText;
+      
       return (
         <QuestionDisplay
           text={questionText}
@@ -404,6 +408,7 @@ export default function TVClientPage() {
           mediaUrl={status.media || currentQuestion?.media_url || null}
           showTimer={status.show_timer}
           timerSeconds={timerSeconds !== null ? timerSeconds : (status.timer_seconds || 0)}
+          isDiscussionStarted={isDiscussionStarted}
         />
       );
     }

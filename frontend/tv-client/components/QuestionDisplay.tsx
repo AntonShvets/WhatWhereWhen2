@@ -6,6 +6,7 @@ interface QuestionDisplayProps {
   mediaUrl: string | null;
   showTimer?: boolean;
   timerSeconds?: number;
+  isDiscussionStarted?: boolean; // Добавляем новый проп
 }
 
 /**
@@ -18,6 +19,7 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
   mediaUrl,
   showTimer = false,
   timerSeconds = 0,
+  isDiscussionStarted = false, // Добавляем новый проп
 }) => {
   const renderMedia = () => {
     if (!mediaUrl) return null;
@@ -85,7 +87,12 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
       {/* Таймер */}
       {showTimer && timerSeconds !== undefined && (
         <div className="mb-8">
-          <div className={`text-tv-2xl font-bold ${getTimerColor(timerSeconds)} animate-pulse`}>
+          <div 
+            className={`font-bold ${getTimerColor(timerSeconds)} animate-pulse ${
+              isDiscussionStarted ? '' : 'text-tv-2xl'
+            }`}
+            style={isDiscussionStarted ? { fontSize: '24rem' } : undefined}
+          >
             {Math.floor(timerSeconds / 60)}:{(timerSeconds % 60).toString().padStart(2, '0')}
           </div>
         </div>
