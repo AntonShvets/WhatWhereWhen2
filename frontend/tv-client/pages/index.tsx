@@ -395,7 +395,7 @@ export default function TVClientPage() {
     if (shouldShowQuestion) {
       console.log('✓ RENDERING QUESTION');
       console.log('Question text:', status.question_text);
-      const questionText = status.question_text || currentQuestion?.text || 'Ожидание вопроса...';
+      const questionText = status.question_text || currentQuestion?.text || '';
       console.log('Final question text:', questionText);
       return (
         <QuestionDisplay

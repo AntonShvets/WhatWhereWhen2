@@ -41,6 +41,9 @@ export class Question {
   @Column({ type: 'varchar', length: 100, nullable: true })
   category: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  topic: string; // Тема вопроса
+
   @Column({ type: 'boolean', default: false })
   is_approved: boolean;
 

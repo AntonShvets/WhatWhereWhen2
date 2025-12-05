@@ -11,6 +11,7 @@ interface RoundControlProps {
 export const RoundControl: React.FC<RoundControlProps> = ({ gameId, currentRound, onRoundUpdate }) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [selectedQuestionId, setSelectedQuestionId] = useState<string>('');
+  const [selectedQuestionText, setSelectedQuestionText] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
   const socket = getSocket();
@@ -22,6 +23,10 @@ export const RoundControl: React.FC<RoundControlProps> = ({ gameId, currentRound
   useEffect(() => {
     if (currentRound?.question_id) {
       setSelectedQuestionId(currentRound.question_id);
+      // Загружаем полный текст вопроса, если он уже выбран
+      loadQuestionText(currentRound.question_id);
+    } else {
+      setSelectedQuestionText('');
     }
   }, [currentRound]);
 
@@ -32,6 +37,41 @@ export const RoundControl: React.FC<RoundControlProps> = ({ gameId, currentRound
     } catch (error) {
       console.error('Error loading questions:', error);
     }
+  };
+
+  const loadQuestionText = async (questionId: string) => {
+    try {
+      const response = await questionsApi.getById(questionId);
+      setSelectedQuestionText(response.data.text);
+    } catch (error) {
+      console.error('Error loading question text:', error);
+      setSelectedQuestionText('');
+    }
+  };
+
+  /**
+   * Функция для отображения вопроса в дроп-дауне
+   */
+  const getQuestionDisplayText = (question: Question): string => {
+    const parts: string[] = [];
+    
+    // Тема вопроса
+    if (question.topic) {
+      parts.push(question.topic);
+    }
+    
+    // Имя и фамилия автора
+    if (question.viewer?.name) {
+      // Парсим имя - берем первые два слова как имя и фамилию
+      const nameParts = question.viewer.name.trim().split(/\s+/);
+      if (nameParts.length >= 2) {
+        parts.push(`${nameParts[0]} ${nameParts[1]}`);
+      } else if (nameParts.length === 1) {
+        parts.push(nameParts[0]);
+      }
+    }
+    
+    return parts.length > 0 ? parts.join(' — ') : `Вопрос #${question.id.substring(0, 8)}`;
   };
 
   /**
@@ -47,24 +87,9 @@ export const RoundControl: React.FC<RoundControlProps> = ({ gameId, currentRound
         status,
       });
 
-      // Если статус меняется на 'question_shown', также обновляем display_status с таймером
+      // Если статус меняется на 'question_shown', также обновляем display_status только с таймером
       if (status === 'question_shown') {
-        // Загружаем вопрос, если он есть
-        let questionData: any = {};
-        if (currentRound.question_id) {
-          try {
-            const questionResponse = await questionsApi.getById(currentRound.question_id);
-            const question = questionResponse.data;
-            questionData = {
-              question_text: question.text,
-              question_type: question.type,
-              media: question.media_url || null,
-            };
-          } catch (error) {
-            console.error('Error loading question:', error);
-          }
-        }
-
+        // Отправляем только таймер, без текста вопроса
         socket.emit('display:update', {
           roundId: currentRound.id,
           displayStatus: {
@@ -72,12 +97,13 @@ export const RoundControl: React.FC<RoundControlProps> = ({ gameId, currentRound
             show_question: true,
             show_timer: true,
             timer_seconds: 60,
-            ...questionData,
+            question_text: '', // Пустая строка - текст вопроса не будет отображаться на экране
+            question_type: 'text',
           },
         }, (response: any) => {
           console.log('display:update response:', response);
           if (response && response.success) {
-            console.log('✓ Display status updated with timer');
+            console.log('✓ Display status updated with timer only');
           } else {
             console.error('✗ Failed to update display status:', response);
           }
@@ -99,10 +125,17 @@ export const RoundControl: React.FC<RoundControlProps> = ({ gameId, currentRound
    * Выбор вопроса для раунда
    */
   const handleQuestionSelect = async (questionId: string) => {
-    if (!questionId) return;
+    if (!questionId) {
+      setSelectedQuestionText('');
+      setSelectedQuestionId('');
+      return;
+    }
 
     setLoading(true);
     try {
+      // Сначала загружаем полный текст вопроса для отображения в админке
+      await loadQuestionText(questionId);
+
       // Если раунда нет, создаем новый
       let roundId = currentRound?.id;
       
@@ -133,8 +166,11 @@ export const RoundControl: React.FC<RoundControlProps> = ({ gameId, currentRound
       }
 
       setSelectedQuestionId(questionId);
+      // Примечание: текст вопроса НЕ отправляется на ТВ-экран здесь
+      // Он отобразится на ТВ только при нажатии кнопки "Начать Обсуждение"
     } catch (error) {
       console.error('Error selecting question:', error);
+      setSelectedQuestionText('');
     } finally {
       setLoading(false);
     }
@@ -152,8 +188,12 @@ export const RoundControl: React.FC<RoundControlProps> = ({ gameId, currentRound
         <select
           value={selectedQuestionId}
           onChange={(e) => {
-            if (e.target.value) {
-              handleQuestionSelect(e.target.value);
+            const questionId = e.target.value;
+            setSelectedQuestionId(questionId);
+            if (questionId) {
+              handleQuestionSelect(questionId);
+            } else {
+              setSelectedQuestionText('');
             }
           }}
           disabled={loading}
@@ -162,11 +202,27 @@ export const RoundControl: React.FC<RoundControlProps> = ({ gameId, currentRound
           <option value="">-- Выберите вопрос --</option>
           {questions.map((question) => (
             <option key={question.id} value={question.id}>
-              {question.text.substring(0, 100)}... ({question.type})
+              {getQuestionDisplayText(question)}
             </option>
           ))}
         </select>
       </div>
+
+      {/* Текстовое поле с полным текстом вопроса для ведущего */}
+      {selectedQuestionText && (
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Полный текст вопроса (для ведущего):
+          </label>
+          <textarea
+            value={selectedQuestionText}
+            readOnly
+            rows={8}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 resize-none text-gray-900 font-medium"
+            placeholder="Выберите вопрос из списка выше..."
+          />
+        </div>
+      )}
 
       {/* Кнопки управления статусом */}
       <div className="grid grid-cols-3 gap-4">

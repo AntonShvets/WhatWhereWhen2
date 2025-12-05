@@ -65,11 +65,18 @@ export interface Question {
   media_thumbnail_url: string | null;
   difficulty: number | null;
   category: string | null;
+  topic: string | null; // Тема вопроса
   is_approved: boolean;
   approved_at: string | null;
   question_status: string;
   created_at: string;
   updated_at: string;
+  viewer?: { // Информация об авторе
+    id: string;
+    name: string;
+    city: string | null;
+    country: string | null;
+  } | null;
 }
 
 export interface Expert {

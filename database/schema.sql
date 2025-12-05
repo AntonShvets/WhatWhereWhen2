@@ -49,6 +49,7 @@ CREATE TABLE questions (
     media_thumbnail_url VARCHAR(500), -- Thumbnail for video/image
     difficulty INTEGER CHECK (difficulty >= 1 AND difficulty <= 5), -- 1-5 scale
     category VARCHAR(100), -- Optional category (history, science, etc.)
+    topic VARCHAR(255), -- Тема вопроса
     is_approved BOOLEAN DEFAULT FALSE,
     approved_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
